@@ -1,118 +1,65 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { RNCamera } from 'react-native-camera'; // Assuming you have installed this library
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const [email, setEmail] = useState('');
+  const [scannedData, setScannedData] = useState<string | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const handleScan = async () => {
+    // This function will be triggered when the user wants to scan
+    setIsScanning(true);
+  };
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const onBarcodeRead = ({ data }: { data: string }) => {
+    // This is called when a QR code or barcode is read
+    setScannedData(data);
+    setIsScanning(false);
+    Alert.alert("Scan Successful", "Weight ticket scanned successfully.");
+  };
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+  const handleSendEmail = () => {
+    if (!email || !scannedData) {
+      Alert.alert("Error", "Please scan a ticket and enter an email.");
+      return;
+    }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    // Here, add your logic to send an email with scannedData
+    Alert.alert("Email Sent", `Weight ticket sent to ${email}.`);
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Welcome to ScaleScan">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontSize: 24, marginBottom: 20 }}>ScaleScan</Text>
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+      {isScanning ? (
+        <RNCamera
+          style={{ width: '100%', height: '60%' }}
+          onBarCodeRead={onBarcodeRead}
+          captureAudio={false}
+        />
+      ) : (
+        <>
+          <Button title="Scan Weight Ticket" onPress={handleScan} />
+          <TextInput
+            placeholder="Enter email"
+            value={email}
+            onChangeText={setEmail}
+            style={{
+              borderWidth: 1,
+              width: '80%',
+              marginVertical: 20,
+              padding: 8,
+              borderRadius: 5,
+            }}
+            keyboardType="email-address"
+          />
+          <Button title="Send Ticket" onPress={handleSendEmail} />
+        </>
+      )}
+    </View>
+  );
+};
 
 export default App;
